@@ -7,12 +7,16 @@ from .models import User
 import jwt
 import datetime
 from django.conf import settings
+from ExpenseSheet.models import ExpenseUserData
 
 class registerView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        obj = get_object_or_404(User, email = request.data["email"])
+        bankObj = ExpenseUserData(userObj=obj)
+        bankObj.save()
         return Response(serializer.data)
 
 class loginView(APIView):
