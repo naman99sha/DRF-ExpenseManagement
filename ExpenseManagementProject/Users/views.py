@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.views import APIView
-from ..Users.serializers import *
+from .serializers import *
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 from .models import User
@@ -31,24 +31,24 @@ class loginView(APIView):
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes = 60),
             'iat': datetime.datetime.utcnow()
         }
-        token = jwt.encode(payload, settings.API_SECRET, alogrithm = 'HS256')
+        token = jwt.encode(payload, settings.API_SECRET, algorithm = 'HS256')
         response = Response()
         response.set_cookie(key="jwt", value=token, httponly=True)
         response.data = {"jwt":token}
-        return Response
+        return response
     
 class userView(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
         if not token:
-            raise AuthenticationFailed("Unauthenticated")
+            raise AuthenticationFailed("Unauthenticated, Please Login first")
         
         try:
             payload = jwt.decode(
                 token, settings.API_SECRET, algorithms = ['HS256']
             )
         except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Unauthenticated")
+            raise AuthenticationFailed("Unauthenticated, Please Login Again")
         
         userObj = get_object_or_404(User, id=payload["id"]) or None
         serializer = UserSerializer(userObj)
