@@ -70,3 +70,26 @@ class addExpenseEntry(APIView):
             return Response(bankUserSerializer.data, status=status.HTTP_202_ACCEPTED)
         else:
             return Response({"message":"Bank details for this user does not exist"},status=status.HTTP_404_NOT_FOUND)
+        
+class getCurrentBalance(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+        if not token:
+            raise AuthenticationFailed("Unauthenticated, Please Login first")
+        
+        try:
+            payload = jwt.decode(
+                token, settings.API_SECRET, algorithms = ['HS256']
+            )
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Unauthenticated, Please Login Again")
+        
+        userObj = get_object_or_404(User, id=payload["id"]) or None
+        if not userObj:
+            return Response({"message":"User not found"}, status=status.HTTP_404_NOT_FOUND)
+        bankUserObj = get_object_or_404(ExpenseUserData, userObj=userObj) or None
+        if bankUserObj:
+            data = ExpenseUserSerializer(bankUserObj)
+            return Response(data.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"message":"Bank details for this user does not exist"},status=status.HTTP_404_NOT_FOUND)
