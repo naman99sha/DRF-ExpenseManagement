@@ -23,12 +23,3 @@ class ExpenseEntry(models.Model):
 
     def __str__(self) -> str:
         return f"{self.userObj.userObj.name or None} - {self.title} - {self.transactionType} - {self.date} - {self.amount}"
-
-    def save(self):
-        obj = self.userObj
-        if self.transactionType == "Debit":
-            obj.bankBalance -= self.amount
-        else:
-            obj.bankBalance += self.amount
-        obj.save()
-        return super().save()

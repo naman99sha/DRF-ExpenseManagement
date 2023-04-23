@@ -8,6 +8,7 @@ from rest_framework import status
 import jwt
 from django.conf import settings
 from Users.models import User
+from datetime import date
 
 class addBankBalance(APIView):
     def post(self, request):
@@ -33,6 +34,8 @@ class addBankBalance(APIView):
                 return Response({"message":"Either amount is not passed, or an invalid amount passed. Amount should be numeric"}, status=status.HTTP_400_BAD_REQUEST)
             bankUserObj.bankBalance += amount
             bankUserObj.save()
+            expenseEntryObj = ExpenseEntry(userObj=bankUserObj,title="Amount Credited by User",transactionType="Credit",date=date.today(),amount = amount)
+            expenseEntryObj.save()
             bankUserSerializer = ExpenseUserSerializer(bankUserObj)
             return Response(bankUserSerializer.data, status=status.HTTP_202_ACCEPTED)
         else:
