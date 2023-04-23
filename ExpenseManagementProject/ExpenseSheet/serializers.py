@@ -6,7 +6,7 @@ class ExpenseUserSerializer(serializers.ModelSerializer):
         model = ExpenseUserData
         fields = ["userObj","bankBalance","bankName"]
 
-class ExpenseEntry(serializers.ModelSerializer):
+class ExpenseEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = ExpenseEntry
-        fields = "__all__"
+        fields = ["title","transactionType","date","amount"]
